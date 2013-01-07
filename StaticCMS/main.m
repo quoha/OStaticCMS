@@ -186,6 +186,7 @@ int main(int argc, const char * argv[])
         
         ExecutableAST *ast = [ExecutableAST fromString:foo];
         [ast dump];
+        
 
         if (!outputFile) {
             NSLog(@" warn:\tno output file specified, so not saving results");
