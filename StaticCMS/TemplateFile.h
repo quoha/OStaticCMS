@@ -20,6 +20,7 @@
     NSString *path;
 }
 
+-(NSString *) data;
 -(Boolean   ) findFile:(NSString *)fileName withSearchPath:(QStack *)searchPath;
 -(NSString *) fullFileName;
 -(Boolean   ) loadFile;

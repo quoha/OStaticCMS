@@ -183,8 +183,12 @@ int main(int argc, const char * argv[])
         }
 
         NSString *foo = @"textOne<cms codeZero codeOne />textTwo<cms codeTwo if _thenWord_ else _elseWord_ endif charlie/>textThree";
-        
+
+        // test the ast / parser
+        //
         ExecutableAST *ast = [ExecutableAST fromString:foo];
+        [ast dump];
+        ast = [ExecutableAST fromString:[rootFile data]];
         [ast dump];
 
         if (!outputFile) {

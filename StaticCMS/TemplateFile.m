@@ -10,6 +10,10 @@
 
 @implementation TemplateFile
 
+-(NSString *) data {
+    return data;
+}
+
 -(Boolean) findFile:(NSString *)fileName withSearchPath:(QStack *)searchPath
 {
     NSEnumerator *e = [searchPath reverseObjectEnumerator];
