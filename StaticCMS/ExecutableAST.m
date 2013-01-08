@@ -171,16 +171,7 @@
 
     while (tail) {
         if (tail->isWORD) {
-            if ([tail->text isEqualToString:@"if"]) {
-                tail->isWORD  = false;
-                tail->isIF    = true;
-            } else if ([tail->text isEqualToString:@"else"]) {
-                tail->isWORD  = false;
-                tail->isELSE  = true;
-            } else if ([tail->text isEqualToString:@"endif"]) {
-                tail->isWORD  = false;
-                tail->isENDIF = true;
-            }
+            ;
         }
         tail = tail->nextNode;
     }
@@ -225,8 +216,10 @@
 
     NSLog(@"staring fromString");
     
-    NSString  *codeStart  = @"<cms";
-    NSString  *codeEnd    = @"/>";
+    NSString       *codeStart  = @"<cms";
+    NSString       *codeEnd    = @"/>";
+    NSCharacterSet *whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    NSCharacterSet *quoteOpen  = [NSCharacterSet characterSetWithCharactersInString:@"<"];
 
     NSScanner *theScanner = [NSScanner scannerWithString:string];
     while ([theScanner isAtEnd] == NO) {
@@ -244,19 +237,57 @@
             tail->nextNode = [ExecutableAST initTEXT:theText];
             tail = tail->nextNode;
         }
+
         if (theCode) {
             // break theCode into the individual words before adding
             // it to the tree
             //
-            NSCharacterSet *stopSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
             NSScanner *theScanner = [NSScanner scannerWithString:theCode];
+            
             while ([theScanner isAtEnd] == NO) {
-                NSString *theWord = nil;
-                [theScanner scanUpToCharactersFromSet:stopSet intoString:&theWord];
+                // skip leading whitespace
+                //
+                [theScanner scanCharactersFromSet:whitespace intoString:nil];
 
+                NSString *theWord  = nil;
+
+                // if first character is '<' then treat as a quoted word
+                //
+                NSString *theQuote = nil;
+                [theScanner scanCharactersFromSet:quoteOpen intoString:&theQuote];
+
+                if (!theQuote) {
+                    // word does not start with a quote so it is terminated by whitespace
+                    //
+                    [theScanner scanUpToCharactersFromSet:whitespace intoString:&theWord];
+                } else {
+                    // word starts with a quote so it is terminated by '>'
+                    //
+                    [theScanner scanUpToString:@">" intoString:&theWord];
+                    [theScanner scanString:@">"     intoString:nil];
+                }
+
+                // if we found a word, create a node for it
+                //
                 if (theWord) {
                     tail->nextNode = [ExecutableAST initWORD:theWord];
                     tail = tail->nextNode;
+                    
+                    // if we have text or special words, update the node directly
+                    //
+                    if (theQuote) {
+                        tail->isWORD  = false;
+                        tail->isTEXT  = true;
+                    } else if ([theWord isEqualToString:@"if"]) {
+                        tail->isWORD  = false;
+                        tail->isIF    = true;
+                    } else if ([theWord isEqualToString:@"else"]) {
+                        tail->isWORD  = false;
+                        tail->isELSE  = true;
+                    } else if ([theWord isEqualToString:@"endif"]) {
+                        tail->isWORD  = false;
+                        tail->isENDIF = true;
+                    }
                 }
             }
         }

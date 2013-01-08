@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2DB492CB169BAF400012642F /* Model.m in Sources */ = {isa = PBXBuildFile; fileRef = 2DB492CA169BAF400012642F /* Model.m */; };
 		2DFF0BCA1697842B0089B965 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DFF0BC91697842B0089B965 /* Foundation.framework */; };
 		2DFF0BCD1697842B0089B965 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF0BCC1697842B0089B965 /* main.m */; };
 		2DFF0BD11697842B0089B965 /* StaticCMS.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2DFF0BD01697842B0089B965 /* StaticCMS.1 */; };
@@ -31,6 +32,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2DB492C9169BAF400012642F /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
+		2DB492CA169BAF400012642F /* Model.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Model.m; sourceTree = "<group>"; };
 		2DFF0BC51697842B0089B965 /* StaticCMS */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = StaticCMS; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DFF0BC91697842B0089B965 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		2DFF0BCC1697842B0089B965 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -91,6 +94,8 @@
 				2DFF0BCC1697842B0089B965 /* main.m */,
 				2DFF0BE6169A29230089B965 /* ExecutableAST.h */,
 				2DFF0BE7169A29230089B965 /* ExecutableAST.m */,
+				2DB492C9169BAF400012642F /* Model.h */,
+				2DB492CA169BAF400012642F /* Model.m */,
 				2DFF0BE9169A2A5F0089B965 /* QStack.h */,
 				2DFF0BEA169A2A5F0089B965 /* QStack.m */,
 				2DFF0BE01698DA7F0089B965 /* Reference.h */,
@@ -170,6 +175,7 @@
 				2DFF0BE5169954A20089B965 /* SymbolTable.m in Sources */,
 				2DFF0BE8169A29230089B965 /* ExecutableAST.m in Sources */,
 				2DFF0BEB169A2A600089B965 /* QStack.m in Sources */,
+				2DB492CB169BAF400012642F /* Model.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

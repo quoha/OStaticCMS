@@ -66,13 +66,16 @@
 
 #import <Foundation/Foundation.h>
 #include "ExecutableAST.h"
+#include "Model.h"
 #include "QStack.h"
 #include "Reference.h"
 #include "SymbolTable.h"
 #include "TemplateFile.h"
 
 static const char *optHelp         = "--help";
+static const char *optModelFile    = "--model-file=";
 static const char *optOutputFile   = "--output-file=";
+static const char *optSearchFile   = "--search-path=";
 static const char *optSiteName     = "--site-name=";
 static const char *optTemplateFile = "--template-file=";
 static const char *optTemplatePath = "--template-path=";
@@ -95,11 +98,13 @@ int main(int argc, const char * argv[])
         
         NSLog(@"StaticCMS starting...");
 
+        Model        *model              = [[Model alloc] init];
         NSString     *outputFile         = 0;
         TemplateFile *rootFile           = 0;
+        NSString     *rootView           = 0;
         SymbolTable  *symbolTable        = [[SymbolTable alloc] init];
         QStack       *templateSearchPath = [[QStack alloc] init];
-        NSString     *siteName = @"";
+        NSString     *siteName = @"dude, remove this logic";
         Reference *r = [[Reference alloc] init];
         [r setName:@"siteName"];
         [r setObject:siteName];
@@ -108,7 +113,7 @@ int main(int argc, const char * argv[])
 
         Reference *q = [symbolTable objectForKey:[r name]];
         if (q) {
-            NSLog(@"st found '%@'", [q name]);
+            NSLog(@" main:\treference symbol table found '%@'", [q name]);
         }
 
         for (int idx = 1; idx < argc; idx++) {
@@ -132,6 +137,15 @@ int main(int argc, const char * argv[])
             if (OptIs(opt, optHelp)) {
                 NSLog(@"usage:\t....\n");
                 return 2;
+            } else if (OptIs(opt, optModelFile) && *s) {
+                // load the model from the file
+                //
+                if (![model addVariablesFromFile:val]) {
+                    NSLog(@"error:\tcould not load model '%@'", val);
+                    return 2;
+                }
+                val = 0;
+                [model dump];
             } else if (OptIs(opt, optOutputFile) && *s) {
                 // save the output file name
                 //
@@ -142,7 +156,7 @@ int main(int argc, const char * argv[])
             } else if (OptIs(opt, optTemplateFile) && *s) {
                 // use the template search path to find the template file
                 //
-                if (rootFile) {
+                if (rootFile || rootView) {
                     NSLog(@"error:\tyou may only specify one template file\n");
                     return 2;
                 }
@@ -153,6 +167,7 @@ int main(int argc, const char * argv[])
                 rootFile = [[TemplateFile alloc] init];
                 Boolean foundFile = [rootFile findFile:val withSearchPath:templateSearchPath];
                 if (foundFile) {
+                    rootView = val;
                     val = 0;
                 } else {
                     NSLog(@"error:\tunable to locate '%@' using template search path", val);
@@ -174,6 +189,10 @@ int main(int argc, const char * argv[])
             NSLog(@"error:\tyou must specify a template file\n");
             return 2;
         }
+        if (!rootView) {
+            NSLog(@"error:\tyou must specify a root view to use\n");
+            return 2;
+        }
 
         // load and execute (searchPath + fileName)
         //
@@ -182,15 +201,23 @@ int main(int argc, const char * argv[])
             return 0;
         }
 
-        NSString *foo = @"textOne<cms codeZero codeOne />textTwo<cms codeTwo if _thenWord_ else _elseWord_ endif charlie/>textThree";
+        // we're going to create a view that does nothing but include the first
+        // template. we'll use that view. i think that the rational for doing
+        // this is to make it look exactly like it will in the rest of the code.
+        // in other words, we don't have to treat the bootstrapping as anything
+        // special
+        //
+        NSString *firstView = [[NSString alloc] initWithFormat:@"<cms <%@> include />", rootView];
 
         // test the ast / parser
         //
-        ExecutableAST *ast = [ExecutableAST fromString:foo];
-        [ast dump];
-        ast = [ExecutableAST fromString:[rootFile data]];
+        ExecutableAST *ast = [ExecutableAST fromString:firstView];
         [ast dump];
 
+        // execute that ast
+        //
+        //[ast executeWithStack:stack andModel:model];
+        
         if (!outputFile) {
             NSLog(@" warn:\tno output file specified, so not saving results");
             return 1;
