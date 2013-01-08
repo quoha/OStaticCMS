@@ -9,7 +9,7 @@
 #define StaticCMS_SymbolTable_H
 
 #import <Foundation/Foundation.h>
-#include "Reference.h"
+#import "Reference.h"
 
 @interface SymbolTable : NSObject
 {

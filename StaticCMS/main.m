@@ -65,18 +65,17 @@
 //
 
 #import <Foundation/Foundation.h>
-#include "ExecutableAST.h"
-#include "Model.h"
-#include "QStack.h"
-#include "Reference.h"
-#include "SymbolTable.h"
-#include "TemplateFile.h"
+#import "ExecutableAST.h"
+#import "Model.h"
+#import "QStack.h"
+#import "Reference.h"
+#import "SymbolTable.h"
+#import "TemplateFile.h"
 
 static const char *optHelp         = "--help";
 static const char *optModelFile    = "--model-file=";
 static const char *optOutputFile   = "--output-file=";
-static const char *optSearchFile   = "--search-path=";
-static const char *optSiteName     = "--site-name=";
+static const char *optSearchPath   = "--search-path=";
 static const char *optTemplateFile = "--template-file=";
 static const char *optTemplatePath = "--template-path=";
 
@@ -102,19 +101,8 @@ int main(int argc, const char * argv[])
         NSString     *outputFile         = 0;
         TemplateFile *rootFile           = 0;
         NSString     *rootView           = 0;
-        SymbolTable  *symbolTable        = [[SymbolTable alloc] init];
+        QStack       *searchPath         = [[QStack alloc] init];
         QStack       *templateSearchPath = [[QStack alloc] init];
-        NSString     *siteName = @"dude, remove this logic";
-        Reference *r = [[Reference alloc] init];
-        [r setName:@"siteName"];
-        [r setObject:siteName];
-
-        [symbolTable addReference:r];
-
-        Reference *q = [symbolTable objectForKey:[r name]];
-        if (q) {
-            NSLog(@" main:\treference symbol table found '%@'", [q name]);
-        }
 
         for (int idx = 1; idx < argc; idx++) {
             const char *opt = argv[idx];
@@ -140,7 +128,7 @@ int main(int argc, const char * argv[])
             } else if (OptIs(opt, optModelFile) && *s) {
                 // load the model from the file
                 //
-                if (![model addVariablesFromFile:val]) {
+                if (![model addVariablesFromFile:val withSearchPath:searchPath]) {
                     NSLog(@"error:\tcould not load model '%@'", val);
                     return 2;
                 }
@@ -151,8 +139,10 @@ int main(int argc, const char * argv[])
                 //
                 outputFile = val;
                 val = 0;
-            } else if (OptIs(opt, optSiteName) && val) {
-                siteName = val;
+            } else if (OptIs(opt, optSearchPath) && *s) {
+                // add search path
+                //
+                [searchPath pushTop:val];
             } else if (OptIs(opt, optTemplateFile) && *s) {
                 // use the template search path to find the template file
                 //
@@ -174,7 +164,6 @@ int main(int argc, const char * argv[])
                     [templateSearchPath dump];
                     return 2;
                 }
-
             } else if (OptIs(opt, optTemplatePath) && *s) {
                 // add template path
                 //

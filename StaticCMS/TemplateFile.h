@@ -9,7 +9,7 @@
 #define StaticCMS_TemplateFile_H
 
 #import <Foundation/Foundation.h>
-#include "QStack.h"
+#import "QStack.h"
 
 @interface TemplateFile : NSObject
 {

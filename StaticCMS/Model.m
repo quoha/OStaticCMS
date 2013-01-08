@@ -28,27 +28,44 @@
 }
 
 //
-// format should be
-//    name = value
-//    ~~~~
-//    article
-// if there is no separator, then the entire file is treated as name value pairs.
-// in other words, the article is optional. the name value pairs are not.
 //
--(Boolean) addVariablesFromFile: (NSString *)fileName {
+-(Boolean) addVariablesFromFile: (NSString *)fileName withSearchPath:(QStack *)searchPath {
+    NSEnumerator *e = [searchPath reverseObjectEnumerator];
+    id            object;
+
+    while (object = [e nextObject]) {
+        NSString *fullPath = [object stringByAppendingString:fileName];
+        
+        NSLog(@"looking for model %@", fullPath);
+        
+        // search for the file
+        //
+        if ([[NSFileManager defaultManager] fileExistsAtPath:fullPath]) {
+            NSLog(@"found       model %@", fileName);
+
+            return [self addVariablesFromPath:fullPath];
+        }
+    }
+
+    return false;
+}
+
+//
+//
+-(Boolean) addVariablesFromPath: (NSString *)fileName {
     NSError  *err  = 0;
     NSString *data = [NSString stringWithContentsOfFile:fileName encoding:NSUTF8StringEncoding error:&err];
     if (!data) {
         NSLog(@"error:\tmodel failed to read %@\n\t%@\n", fileName, [err localizedFailureReason]);
         return false;
     }
-
+    
     return [self addVariablesFromString:data];
 }
 
 //
 // format should be
-//    name = value
+//    "name" = "value";
 //    ~~~~
 //    article
 // if there is no separator, then the entire file is treated as name value pairs.
@@ -57,12 +74,12 @@
 -(Boolean) addVariablesFromString:(NSString *)string {
     NSString  *nameValues = nil;
     NSString  *theArticle = nil;
-    NSString  *separator  = @"~~~~\n";
+    NSString  *separator  = @"<@<@>@>\n";
     NSScanner *theScanner = [NSScanner scannerWithString:string];
 
-    [theScanner scanUpToString:separator  intoString:&nameValues];
-    [theScanner scanString:separator      intoString:nil];
-    [theScanner scanUpToString:@"<@<@>@>" intoString:&theArticle];
+    [theScanner scanUpToString:separator intoString:&nameValues];
+    [theScanner scanString:separator     intoString:nil];
+    [theScanner scanUpToString:separator intoString:&theArticle];
 
     if (theArticle) {
         [self addVariable:@"articleText" withValue:theArticle];

@@ -3,7 +3,7 @@
 "pageTitle" = "The Power of Static";
 "articleTitle" = "The Power of Static";
 "wordToReplace" = "slugline";
-~~~~
+<@<@>@>
 I would like a <cms wordToReplace />. But I will settle for less.
 
 Testing, paragraph two. Good luck.
