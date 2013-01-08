@@ -102,6 +102,7 @@ int main(int argc, const char * argv[])
         TemplateFile *rootFile           = 0;
         NSString     *rootView           = 0;
         QStack       *searchPath         = [[QStack alloc] init];
+        QStack       *stack              = [[QStack alloc] init];
         QStack       *templateSearchPath = [[QStack alloc] init];
 
         for (int idx = 1; idx < argc; idx++) {
@@ -201,12 +202,11 @@ int main(int argc, const char * argv[])
         // test the ast / parser
         //
         ExecutableAST *ast = [ExecutableAST fromString:firstView];
-        [ast dump];
-        
+        [ExecutableAST dump:ast];
 
         // execute that ast
         //
-        //[ast executeWithStack:stack andModel:model];
+        [ExecutableAST execute:ast withStack:stack andModel:model andTrace:YES];
         
         if (!outputFile) {
             NSLog(@" warn:\tno output file specified, so not saving results");

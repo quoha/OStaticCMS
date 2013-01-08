@@ -7,6 +7,12 @@
 //
 
 #import "ExecutableAST.h"
+#import "ExecutableAST_ELSE.h"
+#import "ExecutableAST_ENDIF.h"
+#import "ExecutableAST_IF.h"
+#import "ExecutableAST_NOOP.h"
+#import "ExecutableAST_TEXT.h"
+#import "ExecutableAST_WORD.h"
 
 @implementation ExecutableAST
 
@@ -22,44 +28,39 @@
 -(id) init {
     self = [super init];
     if (self) {
-        isELSE     = false;
-        isENDIF    = false;
-        isIF       = false;
-        isNOOP     = true;
-        isTEXT     = false;
-        isWORD     = false;
         nextNode   = nil;
-        branchElse = nil;
-        branchThen = nil;
     }
     return self;
 }
 
--(void) dump {
-    ExecutableAST *ast = self;
-
-    while (ast) {
-        if (ast->isELSE) {
-            NSLog(@"ast else");
-        } else if (ast->isENDIF) {
-            NSLog(@"ast endif");
-        } else if (ast->isIF) {
-            NSLog(@"ast if");
-        } else if (ast->isNOOP) {
-            NSLog(@"ast no-op");
-        } else if (ast->isTEXT) {
-            NSLog(@"ast text '%@'", ast->text);
-        } else if (ast->isWORD) {
-            NSLog(@"ast word '%@'", ast->text);
-        } else {
-            NSLog(@"fromStack uknown AST");
-        }
-        ast = ast->nextNode;
++(void) dump: (ExecutableAST *) node {
+    while (node) {
+        [node dump];
+        node = node->nextNode;
     }
 }
 
-+(Boolean) execute: (ExecutableAST *) ast withStack:(QStack *) stack {
+-(void) dump {
+    NSLog(@"**ast:\tbase AST node");
+}
+
+-(ExecutableAST *) execute: (QStack *) stack withTrace:(BOOL)doTrace {
+    if (doTrace) {
+        NSLog(@">>ast:\trun node");
+    }
+    return nextNode;
+}
+
++(ExecutableAST *) execute:(ExecutableAST *) ast withStack:(QStack *) stack andModel:(Model *)model andTrace:(BOOL)doTrace {
     while (ast) {
+        if (doTrace) {
+            //[ast dump];
+        }
+        ExecutableAST *nextNode = [ast execute:stack withTrace:doTrace];
+        
+        ast = nextNode;
+
+#if 0
         if (ast->isIF) {
             // pop top element from Stack
             //
@@ -84,26 +85,27 @@
             // no-op means to do nothing
             //
             ast = ast->nextNode;
-        } else if (ast->isTEXT) {
-            // push TEXT to Stack
-            //
-            [stack pushTop:ast->text];
-            ast = ast->nextNode;
-        } else if (ast->isWORD) {
-            //       check if the Node's word is defined in the Model
-            //       if the Word is a function
-            //         execute the function with AST, Stack and Model
-            //         ? how do we handle INCLUDE ?
-            //           INCLUDE will load a View
-            //           ask the View to return an AST
-            //           invoke the Interpreter against the AST
-            ast = ast->nextNode;
+        //} else if (ast->isTEXT) {
+        //    // push TEXT to Stack
+        //    //
+        //    [stack pushTop:ast->text];
+        //    ast = ast->nextNode;
+        //} else if (ast->isWORD) {
+        //    //       check if the Node's word is defined in the Model
+        //    //       if the Word is a function
+        //    //         execute the function with AST, Stack and Model
+        //    //         ? how do we handle INCLUDE ?
+        //    //           INCLUDE will load a View
+        //    //           ask the View to return an AST
+        //    //           invoke the Interpreter against the AST
+        //    ast = ast->nextNode;
         } else {
             NSLog(@"error:\tunexpected AST type");
-            return false;
+            return nil;
         }
+#endif
     }
-    return true;
+    return nil;
 }
 
 +(ExecutableAST *) fixupIF: (ExecutableAST *)root {
@@ -116,19 +118,18 @@
     QStack *ifStack = [[QStack alloc] init];
 
     while (tail) {
-        if (tail->isIF) {
+        if ([tail isKindOfClass:[ExecutableAST_IF class]]) {
             // when we find IF, we need to branch the tree
             //
-            ExecutableAST *parentIF = tail;
+            // link the parent IF to the THEN branch
+            //
+            ExecutableAST_IF *parentIF = (ExecutableAST_IF *)tail;
+            [parentIF setThen:tail];
 
             // push this node onto the stack
             //
             [ifStack pushTop:parentIF];
-
-            // link the parent IF to the THEN branch
-            //
-            tail->branchThen = tail->nextNode;
-        } else if (tail->isELSE) {
+        } else if ([tail isKindOfClass:[ExecutableAST_ELSE class]]) {
             // first check that we're in an IF block
             //
             if ([ifStack isEmpty]) {
@@ -137,12 +138,12 @@
                 NSLog(@"error:\tfound 'else' outside of 'if ... else ... endif'");
                 return nil;
             }
-            ExecutableAST *parentIF = [ifStack peekTop];
 
             // link the parent IF to the ELSE branch
             //
-            parentIF->branchElse = tail;
-        } else if (tail->isENDIF) {
+            ExecutableAST_IF *parentIF = [ifStack peekTop];
+            [parentIF setElse:tail];
+        } else if ([tail isKindOfClass:[ExecutableAST_ENDIF class]]) {
             // first check that we're in an IF block
             //
             if ([ifStack isEmpty]) {
@@ -151,28 +152,13 @@
                 NSLog(@"error:\tfound 'endif' outside of 'if ... else ... endif'");
                 return nil;
             }
-            ExecutableAST *parentIF = [ifStack popTop];
 
             // link the parent IF to the ENDIF
             //
-            parentIF->nextNode = tail;
+            ExecutableAST_IF *parentIF = [ifStack popTop];
+            [parentIF setNext:tail];
         }
 
-        tail = tail->nextNode;
-    }
-
-    return root;
-}
-
-// be kind - fix the type of the word if we know it
-//
-+(ExecutableAST *) fixWordType: (ExecutableAST *)root {
-    ExecutableAST *tail = root;
-
-    while (tail) {
-        if (tail->isWORD) {
-            ;
-        }
         tail = tail->nextNode;
     }
 
@@ -180,7 +166,7 @@
 }
 
 +(ExecutableAST *) fromStack:(QStack *)stack {
-    ExecutableAST *root = [ExecutableAST initNOOP];
+    ExecutableAST *root = [[ExecutableAST_NOOP alloc] init];
 #if 0
     ExecutableAST *tail = root;
 
@@ -211,7 +197,7 @@
 // node type
 //
 +(ExecutableAST *) fromString:(NSString *)string {
-    ExecutableAST *root = [ExecutableAST initNOOP];
+    ExecutableAST *root = [[ExecutableAST_NOOP alloc] init];
     ExecutableAST *tail = root;
 
     NSLog(@"staring fromString");
@@ -234,7 +220,7 @@
         if (theText) {
             // add TEXT directly to the tree
             //
-            tail->nextNode = [ExecutableAST initTEXT:theText];
+            tail->nextNode = [[ExecutableAST_TEXT alloc] initWithString:theText];
             tail = tail->nextNode;
         }
 
@@ -270,24 +256,20 @@
                 // if we found a word, create a node for it
                 //
                 if (theWord) {
-                    tail->nextNode = [ExecutableAST initWORD:theWord];
-                    tail = tail->nextNode;
-                    
                     // if we have text or special words, update the node directly
                     //
                     if (theQuote) {
-                        tail->isWORD  = false;
-                        tail->isTEXT  = true;
+                        tail->nextNode = [[ExecutableAST_TEXT alloc] initWithString:theWord];
                     } else if ([theWord isEqualToString:@"if"]) {
-                        tail->isWORD  = false;
-                        tail->isIF    = true;
+                        tail->nextNode = [[ExecutableAST_IF alloc] init];
                     } else if ([theWord isEqualToString:@"else"]) {
-                        tail->isWORD  = false;
-                        tail->isELSE  = true;
+                        tail->nextNode = [[ExecutableAST_ELSE alloc] init];
                     } else if ([theWord isEqualToString:@"endif"]) {
-                        tail->isWORD  = false;
-                        tail->isENDIF = true;
+                        tail->nextNode = [[ExecutableAST_ENDIF alloc] init];
+                    } else {
+                        tail->nextNode = [[ExecutableAST_WORD alloc] initWithString:theWord];
                     }
+                    tail = tail->nextNode;
                 }
             }
         }
@@ -296,36 +278,12 @@
     // make sure that the tree always ends with a no-op
     //
     if (tail != root) {
-        tail->nextNode = [ExecutableAST initNOOP];
+        tail->nextNode = [[ExecutableAST_NOOP alloc] init];
     }
 
     // we ignored IF statements. run through the tree and add them back in
     //
-    [ExecutableAST fixWordType:root];
-
     return [ExecutableAST fixupIF:root];
-}
-
-+(ExecutableAST *) initNOOP {
-    ExecutableAST *ast = [[ExecutableAST alloc] init];
-    ast->isNOOP = true;
-    return ast;
-}
-
-+(ExecutableAST *) initTEXT:(NSString *)text {
-    ExecutableAST *ast = [[ExecutableAST alloc] init];
-    ast->isNOOP = false;
-    ast->isTEXT = true;
-    ast->text   = text;
-    return ast;
-}
-
-+(ExecutableAST *) initWORD:(NSString *)text {
-    ExecutableAST *ast = [[ExecutableAST alloc] init];
-    ast->isNOOP = false;
-    ast->isWORD = true;
-    ast->text   = text;
-    return ast;
 }
 
 @end

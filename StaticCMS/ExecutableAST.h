@@ -9,33 +9,22 @@
 #define StaticCMS_ExecutableAST_H
 
 #import <Foundation/Foundation.h>
-#include "QStack.h"
+#import "Model.h"
+#import "QStack.h"
 
 @interface ExecutableAST : NSObject
 {
-    Boolean isELSE;
-    Boolean isENDIF;
-    Boolean isIF;
-    Boolean isNOOP;
-    Boolean isTEXT;
-    Boolean isWORD;
-    
-    ExecutableAST *branchElse;
-    ExecutableAST *branchThen;
     ExecutableAST *nextNode;
-    NSString      *text;
 }
 
-+(Boolean        ) execute: (ExecutableAST *) ast withStack:(QStack *) stack;
++(void           ) dump: (ExecutableAST *) node;
++(ExecutableAST *) execute: (ExecutableAST *) ast withStack:(QStack *)stack  andModel:(Model *)model andTrace:(BOOL)doTrace;
 +(ExecutableAST *) fixupIF: (ExecutableAST *) root;
-+(ExecutableAST *) fixWordType: (ExecutableAST *) root;
 +(ExecutableAST *) fromStack: (QStack *) stack;
 +(ExecutableAST *) fromString: (NSString *) string;
-+(ExecutableAST *) initNOOP;
-+(ExecutableAST *) initTEXT: (NSString *)text;
-+(ExecutableAST *) initWORD: (NSString *)text;
 
--(void) dump;
+-(void           ) dump;
+-(ExecutableAST *) execute: (QStack *) stack withTrace:(BOOL)doTrace;
 
 @end
 
