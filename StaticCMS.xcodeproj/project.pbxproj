@@ -14,6 +14,7 @@
 		2DB492D8169BD9090012642F /* ExecutableAST_IF.m in Sources */ = {isa = PBXBuildFile; fileRef = 2DB492D7169BD9090012642F /* ExecutableAST_IF.m */; };
 		2DB492DB169BDC5B0012642F /* ExecutableAST_ELSE.m in Sources */ = {isa = PBXBuildFile; fileRef = 2DB492DA169BDC5B0012642F /* ExecutableAST_ELSE.m */; };
 		2DB492DE169BDCDB0012642F /* ExecutableAST_ENDIF.m in Sources */ = {isa = PBXBuildFile; fileRef = 2DB492DD169BDCDB0012642F /* ExecutableAST_ENDIF.m */; };
+		2DB492E4169BE5500012642F /* ExecutableAST_include.m in Sources */ = {isa = PBXBuildFile; fileRef = 2DB492E3169BE5500012642F /* ExecutableAST_include.m */; };
 		2DFF0BCA1697842B0089B965 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DFF0BC91697842B0089B965 /* Foundation.framework */; };
 		2DFF0BCD1697842B0089B965 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF0BCC1697842B0089B965 /* main.m */; };
 		2DFF0BD11697842B0089B965 /* StaticCMS.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2DFF0BD01697842B0089B965 /* StaticCMS.1 */; };
@@ -52,6 +53,8 @@
 		2DB492DA169BDC5B0012642F /* ExecutableAST_ELSE.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExecutableAST_ELSE.m; sourceTree = "<group>"; };
 		2DB492DC169BDCDB0012642F /* ExecutableAST_ENDIF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExecutableAST_ENDIF.h; sourceTree = "<group>"; };
 		2DB492DD169BDCDB0012642F /* ExecutableAST_ENDIF.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExecutableAST_ENDIF.m; sourceTree = "<group>"; };
+		2DB492E2169BE5500012642F /* ExecutableAST_include.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExecutableAST_include.h; sourceTree = "<group>"; };
+		2DB492E3169BE5500012642F /* ExecutableAST_include.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExecutableAST_include.m; sourceTree = "<group>"; };
 		2DFF0BC51697842B0089B965 /* StaticCMS */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = StaticCMS; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DFF0BC91697842B0089B965 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		2DFF0BCC1697842B0089B965 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -124,6 +127,8 @@
 				2DB492D1169BD3400012642F /* ExecutableAST_TEXT.m */,
 				2DB492D3169BD5B60012642F /* ExecutableAST_WORD.h */,
 				2DB492D4169BD5B60012642F /* ExecutableAST_WORD.m */,
+				2DB492E2169BE5500012642F /* ExecutableAST_include.h */,
+				2DB492E3169BE5500012642F /* ExecutableAST_include.m */,
 				2DB492C9169BAF400012642F /* Model.h */,
 				2DB492CA169BAF400012642F /* Model.m */,
 				2DFF0BE9169A2A5F0089B965 /* QStack.h */,
@@ -212,6 +217,7 @@
 				2DB492D8169BD9090012642F /* ExecutableAST_IF.m in Sources */,
 				2DB492DB169BDC5B0012642F /* ExecutableAST_ELSE.m in Sources */,
 				2DB492DE169BDCDB0012642F /* ExecutableAST_ENDIF.m in Sources */,
+				2DB492E4169BE5500012642F /* ExecutableAST_include.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

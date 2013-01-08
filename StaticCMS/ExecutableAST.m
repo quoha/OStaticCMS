@@ -13,6 +13,7 @@
 #import "ExecutableAST_NOOP.h"
 #import "ExecutableAST_TEXT.h"
 #import "ExecutableAST_WORD.h"
+#import "ExecutableAST_include.h"
 
 @implementation ExecutableAST
 
@@ -266,6 +267,8 @@
                         tail->nextNode = [[ExecutableAST_ELSE alloc] init];
                     } else if ([theWord isEqualToString:@"endif"]) {
                         tail->nextNode = [[ExecutableAST_ENDIF alloc] init];
+                    } else if ([theWord isEqualToString:@"include"]) {
+                        tail->nextNode = [[ExecutableAST_include alloc] init];
                     } else {
                         tail->nextNode = [[ExecutableAST_WORD alloc] initWithString:theWord];
                     }
