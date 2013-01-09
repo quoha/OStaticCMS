@@ -14,17 +14,12 @@
 #import "ExecutableAST_TEXT.h"
 #import "ExecutableAST_WORD.h"
 #import "ExecutableAST_include.h"
+#import "ExecutableAST_testCondition.h"
+
+static Model      *model      = 0;
+static SearchPath *searchPath = 0;
 
 @implementation ExecutableAST
-
-//   for each Node
-//     if the Node is "IF"
-//     else if the Node is "TEXT"
-//       node = next node
-//     else
-//       else
-//         throw an exception
-//       node = next node
 
 -(id) init {
     self = [super init];
@@ -52,7 +47,21 @@
     return nextNode;
 }
 
-+(ExecutableAST *) execute:(ExecutableAST *) ast withStack:(QStack *) stack andModel:(Model *)model andTrace:(BOOL)doTrace {
++(ExecutableAST *) execute:(ExecutableAST *) ast withStack:(QStack *) stack andModel:(Model *)model_ andTrace:(BOOL)doTrace andSearchPath:(SearchPath *)searchPath_ {
+
+    if (!stack) {
+        NSLog(@"error:\tinternal error - execute called with no stack");
+        return nil;
+    }
+
+    if (!model) {
+        model = model_;
+    }
+
+    if (!searchPath) {
+        searchPath = searchPath_;
+    }
+
     while (ast) {
         if (doTrace) {
             //[ast dump];
@@ -60,51 +69,6 @@
         ExecutableAST *nextNode = [ast execute:stack withTrace:doTrace];
         
         ast = nextNode;
-
-#if 0
-        if (ast->isIF) {
-            // pop top element from Stack
-            //
-            id object = [stack popTop];
-            
-            // if value is TRUE
-            //    node = branchThen node
-            // else
-            //    node = branchThen node
-            // somehow use object to derive condition
-            //
-            Boolean priorWord = object ? true : false;
-
-            // based on that condition, take a branch
-            //
-            if (priorWord) {
-                ast = ast->nextNode;
-            } else {
-                ast = ast->branchElse;
-            }
-        } else if (ast->isNOOP) {
-            // no-op means to do nothing
-            //
-            ast = ast->nextNode;
-        //} else if (ast->isTEXT) {
-        //    // push TEXT to Stack
-        //    //
-        //    [stack pushTop:ast->text];
-        //    ast = ast->nextNode;
-        //} else if (ast->isWORD) {
-        //    //       check if the Node's word is defined in the Model
-        //    //       if the Word is a function
-        //    //         execute the function with AST, Stack and Model
-        //    //         ? how do we handle INCLUDE ?
-        //    //           INCLUDE will load a View
-        //    //           ask the View to return an AST
-        //    //           invoke the Interpreter against the AST
-        //    ast = ast->nextNode;
-        } else {
-            NSLog(@"error:\tunexpected AST type");
-            return nil;
-        }
-#endif
     }
     return nil;
 }
@@ -261,6 +225,8 @@
                     //
                     if (theQuote) {
                         tail->nextNode = [[ExecutableAST_TEXT alloc] initWithString:theWord];
+                    } else if ([theWord isEqualToString:@"?"]) {
+                        tail->nextNode = [[ExecutableAST_testCondition alloc] init];
                     } else if ([theWord isEqualToString:@"if"]) {
                         tail->nextNode = [[ExecutableAST_IF alloc] init];
                     } else if ([theWord isEqualToString:@"else"]) {
@@ -269,6 +235,8 @@
                         tail->nextNode = [[ExecutableAST_ENDIF alloc] init];
                     } else if ([theWord isEqualToString:@"include"]) {
                         tail->nextNode = [[ExecutableAST_include alloc] init];
+                    } else if ([theWord isEqualToString:@"testCondition"]) {
+                        tail->nextNode = [[ExecutableAST_testCondition alloc] init];
                     } else {
                         tail->nextNode = [[ExecutableAST_WORD alloc] initWithString:theWord];
                     }
@@ -287,6 +255,14 @@
     // we ignored IF statements. run through the tree and add them back in
     //
     return [ExecutableAST fixupIF:root];
+}
+
++(Model *) getModel {
+    return model;
+}
+
++(SearchPath *) getSearchPath {
+    return searchPath;
 }
 
 @end

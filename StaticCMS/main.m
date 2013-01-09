@@ -69,6 +69,7 @@
 #import "Model.h"
 #import "QStack.h"
 #import "Reference.h"
+#import "SearchPath.h"
 #import "SymbolTable.h"
 #import "TemplateFile.h"
 
@@ -77,7 +78,6 @@ static const char *optModelFile    = "--model-file=";
 static const char *optOutputFile   = "--output-file=";
 static const char *optSearchPath   = "--search-path=";
 static const char *optTemplateFile = "--template-file=";
-static const char *optTemplatePath = "--template-path=";
 
 //------------------------------------------------------------------
 //
@@ -101,9 +101,8 @@ int main(int argc, const char * argv[])
         NSString     *outputFile         = 0;
         TemplateFile *rootFile           = 0;
         NSString     *rootView           = 0;
-        QStack       *searchPath         = [[QStack alloc] init];
+        SearchPath   *searchPath         = [[SearchPath alloc] init];
         QStack       *stack              = [[QStack alloc] init];
-        QStack       *templateSearchPath = [[QStack alloc] init];
 
         for (int idx = 1; idx < argc; idx++) {
             const char *opt = argv[idx];
@@ -143,52 +142,26 @@ int main(int argc, const char * argv[])
             } else if (OptIs(opt, optSearchPath) && *s) {
                 // add search path
                 //
-                [searchPath pushTop:val];
+                [searchPath addPath:val];
             } else if (OptIs(opt, optTemplateFile) && *s) {
                 // use the template search path to find the template file
                 //
-                if (rootFile || rootView) {
+                if (rootView) {
                     NSLog(@"error:\tyou may only specify one template file\n");
                     return 2;
                 }
 
-                // load and execute (searchPath + fileName)
-                //
-
-                rootFile = [[TemplateFile alloc] init];
-                Boolean foundFile = [rootFile findFile:val withSearchPath:templateSearchPath];
-                if (foundFile) {
-                    rootView = val;
-                    val = 0;
-                } else {
-                    NSLog(@"error:\tunable to locate '%@' using template search path", val);
-                    [templateSearchPath dump];
-                    return 2;
-                }
-            } else if (OptIs(opt, optTemplatePath) && *s) {
-                // add template path
-                //
-                [templateSearchPath pushTop:val];
+                rootView = val;
+                val      = 0;
             } else {
                 NSLog(@"error:\tinvalid option '%s'\n", opt);
                 return 2;
             }
         }
 
-        if (!rootFile) {
-            NSLog(@"error:\tyou must specify a template file\n");
-            return 2;
-        }
         if (!rootView) {
             NSLog(@"error:\tyou must specify a root view to use\n");
             return 2;
-        }
-
-        // load and execute (searchPath + fileName)
-        //
-        if (![rootFile loadFile]) {
-            NSLog(@"error:\tcould not load template file '%@'", [rootFile fullFileName]);
-            return 0;
         }
 
         // we're going to create a view that does nothing but include the first
@@ -206,7 +179,8 @@ int main(int argc, const char * argv[])
 
         // execute that ast
         //
-        [ExecutableAST execute:ast withStack:stack andModel:model andTrace:YES];
+        [ExecutableAST execute:ast withStack:stack andModel:model andTrace:YES andSearchPath:searchPath];
+        [stack dump];
         
         if (!outputFile) {
             NSLog(@" warn:\tno output file specified, so not saving results");

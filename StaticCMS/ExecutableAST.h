@@ -11,6 +11,7 @@
 #import <Foundation/Foundation.h>
 #import "Model.h"
 #import "QStack.h"
+#import "SearchPath.h"
 
 @interface ExecutableAST : NSObject
 {
@@ -18,10 +19,12 @@
 }
 
 +(void           ) dump: (ExecutableAST *) node;
-+(ExecutableAST *) execute: (ExecutableAST *) ast withStack:(QStack *)stack  andModel:(Model *)model andTrace:(BOOL)doTrace;
++(ExecutableAST *) execute: (ExecutableAST *) ast withStack:(QStack *)stack  andModel:(Model *)model andTrace:(BOOL)doTrace andSearchPath:(SearchPath *)searchPath;
 +(ExecutableAST *) fixupIF: (ExecutableAST *) root;
 +(ExecutableAST *) fromStack: (QStack *) stack;
 +(ExecutableAST *) fromString: (NSString *) string;
++(Model         *) getModel;
++(SearchPath    *) getSearchPath;
 
 -(void           ) dump;
 -(ExecutableAST *) execute: (QStack *) stack withTrace:(BOOL)doTrace;

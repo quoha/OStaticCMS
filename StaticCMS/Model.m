@@ -18,41 +18,31 @@
     return self;
 }
 
--(Boolean) addVariable: (NSString *)name withValue:(NSString *)value {
+-(BOOL) addVariable: (NSString *)name withValue:(NSString *)value {
     if (!value) {
         value = @"";
     }
     [locals setObject:value forKey:name];
 
-    return true;
+    return YES;
 }
 
 //
 //
--(Boolean) addVariablesFromFile: (NSString *)fileName withSearchPath:(QStack *)searchPath {
-    NSEnumerator *e = [searchPath reverseObjectEnumerator];
-    id            object;
-
-    while (object = [e nextObject]) {
-        NSString *fullPath = [object stringByAppendingString:fileName];
-        
-        NSLog(@"looking for model %@", fullPath);
-        
-        // search for the file
-        //
-        if ([[NSFileManager defaultManager] fileExistsAtPath:fullPath]) {
-            NSLog(@"found       model %@", fileName);
-
-            return [self addVariablesFromPath:fullPath];
-        }
+-(BOOL) addVariablesFromFile: (NSString *)fileName withSearchPath:(SearchPath *)searchPath {
+    NSString *fullPath = [searchPath findFile:fileName];
+    
+    if (!fullPath) {
+        NSLog(@"error:\tmodel can't locate file '%@' in search path", fileName);
+        return NO;
     }
 
-    return false;
+    return [self addVariablesFromPath:fullPath];
 }
 
 //
 //
--(Boolean) addVariablesFromPath: (NSString *)fileName {
+-(BOOL) addVariablesFromPath: (NSString *)fileName {
     NSError  *err  = 0;
     NSString *data = [NSString stringWithContentsOfFile:fileName encoding:NSUTF8StringEncoding error:&err];
     if (!data) {
@@ -71,7 +61,7 @@
 // if there is no separator, then the entire file is treated as name value pairs.
 // in other words, the article is optional. the name value pairs are not.
 //
--(Boolean) addVariablesFromString:(NSString *)string {
+-(BOOL) addVariablesFromString:(NSString *)string {
     NSString  *nameValues = nil;
     NSString  *theArticle = nil;
     NSString  *separator  = @"<@<@>@>\n";

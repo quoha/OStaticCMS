@@ -30,7 +30,18 @@
 }
 
 -(void) dump {
-    // do nothing for now
+    // the enumerator will search the list of paths LIFO
+    //
+    NSEnumerator *e = [stack objectEnumerator];
+    
+    id object;
+    while (object = [e nextObject]) {
+        if ([object isKindOfClass:[NSString class]]) {
+            NSLog(@"stack:\t%@", object);
+        } else {
+            NSLog(@"stack:\tunknown object type");
+        }
+    }
 }
 
 // return an enumerator for going through the stack

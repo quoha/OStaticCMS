@@ -9,17 +9,17 @@
 #define StaticCMS_Model_H
 
 #import <Foundation/Foundation.h>
-#import "QStack.h"
+#import "SearchPath.h"
 
 @interface Model : NSObject
 {
     NSMutableDictionary *locals;
 }
 
--(Boolean   ) addVariable: (NSString *)name withValue:(NSString *)value;
--(Boolean   ) addVariablesFromFile: (NSString *)fileName withSearchPath: (QStack *)searchPath;
--(Boolean   ) addVariablesFromPath: (NSString *)filePath;
--(Boolean   ) addVariablesFromString: (NSString *)string;
+-(BOOL      ) addVariable: (NSString *)name withValue:(NSString *)value;
+-(BOOL      ) addVariablesFromFile: (NSString *)fileName withSearchPath: (SearchPath *)searchPath;
+-(BOOL      ) addVariablesFromPath: (NSString *)filePath;
+-(BOOL      ) addVariablesFromString: (NSString *)string;
 -(void      ) dump;
 -(NSString *) getVariable: (NSString *)name;
 
