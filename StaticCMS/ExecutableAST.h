@@ -28,6 +28,8 @@
 
 -(void           ) dump;
 -(ExecutableAST *) execute: (QStack *) stack withTrace:(BOOL)doTrace;
+-(ExecutableAST *) getNextNode;
+-(void           ) setNextNode:(ExecutableAST *)nextNode;
 
 @end
 

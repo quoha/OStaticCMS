@@ -31,6 +31,10 @@
         NSLog(@">>ast:\trun word %@", name);
     }
     
+    if (!stack) {
+        return nil;
+    }
+
     // nothing to do for a null word
     //
     if (!name) {
@@ -43,6 +47,9 @@
         //
         NSString *val = [model getVariable:name];
         if (val) {
+            if (doTrace) {
+                NSLog(@">>ast:\tword %@ push <%@>", name, val);
+            }
             [stack pushTop:val];
             return nextNode;
         }

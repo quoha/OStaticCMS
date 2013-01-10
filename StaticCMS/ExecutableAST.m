@@ -78,7 +78,8 @@ static SearchPath *searchPath = 0;
         return root;
     }
 
-    ExecutableAST *tail = root;
+    ExecutableAST *tail  = root;
+    ExecutableAST *prior = nil;
 
     QStack *ifStack = [[QStack alloc] init];
 
@@ -88,12 +89,13 @@ static SearchPath *searchPath = 0;
             //
             // link the parent IF to the THEN branch
             //
-            ExecutableAST_IF *parentIF = (ExecutableAST_IF *)tail;
-            [parentIF setThen:tail];
+            ExecutableAST_IF *ifNode   = (ExecutableAST_IF *)tail;
+            ExecutableAST    *thenNode = tail->nextNode;
+            [ifNode setThen:thenNode];
 
-            // push this node onto the stack
+            // push the IF node onto the stack
             //
-            [ifStack pushTop:parentIF];
+            [ifStack pushTop:ifNode];
         } else if ([tail isKindOfClass:[ExecutableAST_ELSE class]]) {
             // first check that we're in an IF block
             //
@@ -104,10 +106,18 @@ static SearchPath *searchPath = 0;
                 return nil;
             }
 
+            ExecutableAST_IF *ifNode   = [ifStack peekTop];
+            ExecutableAST    *elseNode = tail;
+
             // link the parent IF to the ELSE branch
             //
-            ExecutableAST_IF *parentIF = [ifStack peekTop];
-            [parentIF setElse:tail];
+            [ifNode setElse:elseNode];
+
+            // link the last node in the THEN branch to the IF
+            //
+            if (prior) {
+                [ifNode setNextNode:prior];
+            }
         } else if ([tail isKindOfClass:[ExecutableAST_ENDIF class]]) {
             // first check that we're in an IF block
             //
@@ -118,13 +128,21 @@ static SearchPath *searchPath = 0;
                 return nil;
             }
 
+            ExecutableAST_IF *ifNode   = [ifStack popTop];
+            ExecutableAST    *thenNode = [ifNode getNextNode];
+            ExecutableAST    *endNode  = tail;
+
             // link the parent IF to the ENDIF
             //
-            ExecutableAST_IF *parentIF = [ifStack popTop];
-            [parentIF setNext:tail];
+            [ifNode setNext:endNode];
+
+            // link the last node in the THEN branch to the ENDIF
+            //
+            [thenNode setNextNode:endNode];
         }
 
-        tail = tail->nextNode;
+        prior = tail;
+        tail  = tail->nextNode;
     }
 
     return root;
@@ -261,8 +279,16 @@ static SearchPath *searchPath = 0;
     return model;
 }
 
+-(ExecutableAST *) getNextNode {
+    return nextNode;
+}
+
 +(SearchPath *) getSearchPath {
     return searchPath;
+}
+
+-(void) setNextNode:(ExecutableAST *)nextNode_ {
+    nextNode = nextNode_;
 }
 
 @end
