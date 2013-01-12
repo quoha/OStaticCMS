@@ -7,6 +7,7 @@
 //
 
 #import "ExecutableAST.h"
+#import "ExecutableAST_compileText.h"
 #import "ExecutableAST_ELSE.h"
 #import "ExecutableAST_ENDIF.h"
 #import "ExecutableAST_IF.h"
@@ -245,12 +246,14 @@ static SearchPath *searchPath = 0;
                         tail->nextNode = [[ExecutableAST_TEXT alloc] initWithString:theWord];
                     } else if ([theWord isEqualToString:@"?"]) {
                         tail->nextNode = [[ExecutableAST_testCondition alloc] init];
-                    } else if ([theWord isEqualToString:@"if"]) {
-                        tail->nextNode = [[ExecutableAST_IF alloc] init];
+                    } else if ([theWord isEqualToString:@"!"]) {
+                        tail->nextNode = [[ExecutableAST_compileText alloc] init];
                     } else if ([theWord isEqualToString:@"else"]) {
                         tail->nextNode = [[ExecutableAST_ELSE alloc] init];
                     } else if ([theWord isEqualToString:@"endif"]) {
                         tail->nextNode = [[ExecutableAST_ENDIF alloc] init];
+                    } else if ([theWord isEqualToString:@"if"]) {
+                        tail->nextNode = [[ExecutableAST_IF alloc] init];
                     } else if ([theWord isEqualToString:@"include"]) {
                         tail->nextNode = [[ExecutableAST_include alloc] init];
                     } else if ([theWord isEqualToString:@"testCondition"]) {
